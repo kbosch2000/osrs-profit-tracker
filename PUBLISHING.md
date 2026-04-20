@@ -2,7 +2,7 @@
 
 ## Local testing
 
-Run `run-profit-tracker-dev.bat` to launch a RuneLite development client with Profit Tracker loaded.
+Run `run-profit-tracker-dev.bat` to launch a RuneLite development client with NPC Profit Tracker loaded.
 
 The normal installed RuneLite client only installs external plugins through the Plugin Hub. Until this plugin is accepted there, use the development launcher.
 

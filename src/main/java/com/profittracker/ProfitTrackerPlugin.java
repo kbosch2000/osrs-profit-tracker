@@ -33,7 +33,7 @@ import net.runelite.client.ui.NavigationButton;
 
 @Slf4j
 @PluginDescriptor(
-	name = "Profit Tracker",
+	name = "NPC Profit Tracker",
 	description = "Tracks NPC kill loot, supply cost, and profit per hour with live OSRS Wiki prices.",
 	tags = {"boss", "loot", "npc", "profit", "supplies"}
 )

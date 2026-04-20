@@ -1,4 +1,4 @@
-# Profit Tracker
+# NPC Profit Tracker
 
 RuneLite external plugin for tracking NPC kill loot, supply costs, and profit per hour.
 
