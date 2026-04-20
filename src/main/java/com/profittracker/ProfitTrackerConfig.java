@@ -61,4 +61,36 @@ public interface ProfitTrackerConfig extends Config
 	{
 		return 8;
 	}
+
+	@ConfigItem(
+		keyName = "showNotableDrops",
+		name = "Show notable drops",
+		description = "Show a mini log of high-value drops with item icons."
+	)
+	default boolean showNotableDrops()
+	{
+		return true;
+	}
+
+	@ConfigItem(
+		keyName = "notableDropThreshold",
+		name = "Notable threshold",
+		description = "Drops at or above this value are added to the notable drop log."
+	)
+	@Range(min = 1_000, max = 2_000_000_000)
+	default int notableDropThreshold()
+	{
+		return 10_000_000;
+	}
+
+	@ConfigItem(
+		keyName = "maxNotableDrops",
+		name = "Notables shown",
+		description = "Maximum number of notable drops to show."
+	)
+	@Range(min = 3, max = 50)
+	default int maxNotableDrops()
+	{
+		return 12;
+	}
 }

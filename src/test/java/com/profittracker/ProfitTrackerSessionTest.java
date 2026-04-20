@@ -18,6 +18,7 @@ public class ProfitTrackerSessionTest
 	private static final int COINS = 995;
 	private static final int BONES = 526;
 	private static final int RUNE_SCIMITAR = 1333;
+	private static final int TWISTED_BOW = 20997;
 
 	private final ProfitTrackerPriceLookup prices = itemId ->
 	{
@@ -29,6 +30,8 @@ public class ProfitTrackerSessionTest
 				return 120;
 			case RUNE_SCIMITAR:
 				return 15_000;
+			case TWISTED_BOW:
+				return 1_500_000_000;
 			default:
 				return 0;
 		}
@@ -159,6 +162,34 @@ public class ProfitTrackerSessionTest
 
 		assertFalse(session.isPaused());
 		assertEquals("Waiting for loot", session.getStatus());
+	}
+
+	@Test
+	public void recordsNotableDropsAtThresholdWithKillCount()
+	{
+		final ProfitTrackerSession session = new ProfitTrackerSession();
+
+		session.recordKill("Great Olm", Collections.singletonList(new ItemStack(COINS, 5_000)), prices, 10_000_000);
+		session.recordKill("Great Olm", Collections.singletonList(new ItemStack(TWISTED_BOW, 1)), prices, 10_000_000);
+
+		assertEquals(1, session.getNotableDrops().size());
+		final ProfitTrackerNotableDrop notable = session.getNotableDrops().iterator().next();
+		assertEquals("Great Olm", notable.getNpcName());
+		assertEquals(TWISTED_BOW, notable.getItemId());
+		assertEquals(1, notable.getQuantity());
+		assertEquals(1_500_000_000L, notable.getValue());
+		assertEquals(2, notable.getKillCount());
+	}
+
+	@Test
+	public void resetClearsNotableDrops()
+	{
+		final ProfitTrackerSession session = new ProfitTrackerSession();
+
+		session.recordKill("Great Olm", Collections.singletonList(new ItemStack(TWISTED_BOW, 1)), prices, 10_000_000);
+		session.reset();
+
+		assertTrue(session.getNotableDrops().isEmpty());
 	}
 
 	private static ProfitTrackerTarget onlyTarget(ProfitTrackerSession session)

@@ -21,6 +21,7 @@ import net.runelite.api.ItemContainer;
 import net.runelite.api.NPC;
 import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.ItemContainerChanged;
+import net.runelite.api.events.MenuOptionClicked;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.events.NpcLootReceived;
@@ -59,6 +60,7 @@ public class ProfitTrackerPlugin extends Plugin
 	private final ProfitTrackerInventory inventory = new ProfitTrackerInventory();
 	private long lastInventoryValue;
 	private boolean hasInventorySnapshot;
+	private boolean pendingSupplyAction;
 
 	@Override
 	protected void startUp()
@@ -87,6 +89,7 @@ public class ProfitTrackerPlugin extends Plugin
 		priceService.stop();
 		lastInventory.clear();
 		hasInventorySnapshot = false;
+		pendingSupplyAction = false;
 		session.reset();
 		log.debug("Profit Tracker stopped");
 	}
@@ -107,7 +110,7 @@ public class ProfitTrackerPlugin extends Plugin
 		final String npcName = npc == null || npc.getName() == null ? "Unknown NPC" : npc.getName();
 		final boolean wasEmpty = session.getKillCount() == 0;
 
-		session.recordKill(npcName, event.getItems(), priceService);
+		session.recordKill(npcName, event.getItems(), priceService, config.notableDropThreshold());
 
 		if (wasEmpty && config.announceNewSession())
 		{
@@ -115,6 +118,15 @@ public class ProfitTrackerPlugin extends Plugin
 		}
 
 		refreshPanel();
+	}
+
+	@Subscribe
+	public void onMenuOptionClicked(MenuOptionClicked event)
+	{
+		if (isSupplyUseOption(event.getMenuOption()))
+		{
+			pendingSupplyAction = true;
+		}
 	}
 
 	@Subscribe
@@ -128,7 +140,7 @@ public class ProfitTrackerPlugin extends Plugin
 		final Map<Integer, Integer> current = toQuantityMap(event.getItemContainer());
 		final long currentValue = inventoryValue(current);
 
-		if (config.countSupplyLosses() && hasInventorySnapshot && session.isStarted() && !session.isPaused())
+		if (config.countSupplyLosses() && pendingSupplyAction && hasInventorySnapshot && session.isStarted() && !session.isPaused())
 		{
 			final long valueLost = lastInventoryValue - currentValue;
 			if (valueLost > 0)
@@ -137,6 +149,7 @@ public class ProfitTrackerPlugin extends Plugin
 				refreshPanel();
 			}
 		}
+		pendingSupplyAction = false;
 
 		lastInventory.clear();
 		lastInventory.putAll(current);
@@ -188,6 +201,21 @@ public class ProfitTrackerPlugin extends Plugin
 	private long inventoryValue(Map<Integer, Integer> quantities)
 	{
 		return inventory.value(quantities, priceService);
+	}
+
+	static boolean isSupplyUseOption(String option)
+	{
+		if (option == null)
+		{
+			return false;
+		}
+
+		final String normalized = option.toLowerCase();
+		return normalized.equals("eat")
+			|| normalized.equals("drink")
+			|| normalized.equals("consume")
+			|| normalized.equals("guzzle")
+			|| normalized.equals("sip");
 	}
 
 	private void refreshPanel()

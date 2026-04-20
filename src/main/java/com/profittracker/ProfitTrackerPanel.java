@@ -10,6 +10,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -86,6 +87,11 @@ class ProfitTrackerPanel extends PluginPanel
 			content.add(message("Kill an NPC to start tracking this trip."));
 		}
 
+		if (config.showNotableDrops() && !session.getNotableDrops().isEmpty())
+		{
+			content.add(notableDropsSection());
+		}
+
 		for (ProfitTrackerTarget target : session.getTargets())
 		{
 			content.add(targetSection(target));
@@ -116,6 +122,32 @@ class ProfitTrackerPanel extends PluginPanel
 		return targetPanel;
 	}
 
+	private JPanel notableDropsSection()
+	{
+		final JPanel panel = section("Notable drops");
+		session.getNotableDrops().stream()
+			.limit(config.maxNotableDrops())
+			.forEach(drop -> panel.add(notableDropRow(drop)));
+		return panel;
+	}
+
+	private JPanel notableDropRow(ProfitTrackerNotableDrop drop)
+	{
+		final JPanel row = new JPanel(new BorderLayout(6, 0));
+		row.setBackground(ColorScheme.DARKER_GRAY_COLOR);
+		row.setBorder(BorderFactory.createEmptyBorder(4, 6, 4, 6));
+
+		final JLabel icon = new JLabel(new ImageIcon(itemManager.getImage(drop.getItemId(), drop.getQuantity(), false)));
+		final JLabel text = new JLabel("<html>" + itemName(drop.getItemId()) + " x" + drop.getQuantity()
+			+ "<br><span style='color:#aaaaaa'>" + drop.getNpcName() + " kc " + drop.getKillCount() + "</span></html>");
+		final JLabel value = new JLabel(formatGp(drop.getValue()), SwingConstants.RIGHT);
+
+		row.add(icon, BorderLayout.WEST);
+		row.add(text, BorderLayout.CENTER);
+		row.add(value, BorderLayout.EAST);
+		return row;
+	}
+
 	private String itemName(int itemId)
 	{
 		try
@@ -134,11 +166,11 @@ class ProfitTrackerPanel extends PluginPanel
 		section.setLayout(new BoxLayout(section, BoxLayout.Y_AXIS));
 		section.setBackground(ColorScheme.DARKER_GRAY_COLOR);
 		section.setBorder(BorderFactory.createTitledBorder(title));
-		section.setMaximumSize(new Dimension(Integer.MAX_VALUE, section.getPreferredSize().height));
 		for (JPanel row : rows)
 		{
 			section.add(row);
 		}
+		section.setMaximumSize(new Dimension(Integer.MAX_VALUE, section.getPreferredSize().height));
 		return section;
 	}
 

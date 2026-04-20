@@ -3,7 +3,10 @@ package com.profittracker;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Deque;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.Map;
 import lombok.Getter;
 import net.runelite.client.game.ItemStack;
@@ -11,6 +14,7 @@ import net.runelite.client.game.ItemStack;
 class ProfitTrackerSession
 {
 	private final Map<String, ProfitTrackerTarget> targets = new LinkedHashMap<>();
+	private final Deque<ProfitTrackerNotableDrop> notableDrops = new LinkedList<>();
 
 	@Getter
 	private Instant startedAt;
@@ -24,7 +28,7 @@ class ProfitTrackerSession
 	private Instant pausedAt;
 	private Duration pausedDuration = Duration.ZERO;
 
-	void recordKill(String npcName, Collection<ItemStack> drops, ProfitTrackerPriceLookup prices)
+	void recordKill(String npcName, Collection<ItemStack> drops, ProfitTrackerPriceLookup prices, long notableThreshold)
 	{
 		if (isPaused())
 		{
@@ -37,6 +41,7 @@ class ProfitTrackerSession
 		}
 
 		final ProfitTrackerTarget target = targets.computeIfAbsent(npcName, ProfitTrackerTarget::new);
+		final int killCount = target.getKills() + 1;
 		long killValue = 0;
 		for (ItemStack drop : drops)
 		{
@@ -48,10 +53,19 @@ class ProfitTrackerSession
 			final long value = (long) prices.getLivePrice(drop.getId()) * drop.getQuantity();
 			killValue += value;
 			target.recordDrop(drop.getId(), drop.getQuantity(), value);
+			if (notableThreshold > 0 && value >= notableThreshold)
+			{
+				notableDrops.addFirst(new ProfitTrackerNotableDrop(npcName, drop.getId(), drop.getQuantity(), value, killCount));
+			}
 		}
 
 		lootValue += killValue;
 		target.recordKill(killValue);
+	}
+
+	void recordKill(String npcName, Collection<ItemStack> drops, ProfitTrackerPriceLookup prices)
+	{
+		recordKill(npcName, drops, prices, Long.MAX_VALUE);
 	}
 
 	void recordSupplyCost(long value)
@@ -67,6 +81,7 @@ class ProfitTrackerSession
 	void reset()
 	{
 		targets.clear();
+		notableDrops.clear();
 		startedAt = null;
 		lootValue = 0;
 		supplyCost = 0;
@@ -146,5 +161,10 @@ class ProfitTrackerSession
 	Collection<ProfitTrackerTarget> getTargets()
 	{
 		return targets.values();
+	}
+
+	Collection<ProfitTrackerNotableDrop> getNotableDrops()
+	{
+		return Collections.unmodifiableCollection(notableDrops);
 	}
 }
