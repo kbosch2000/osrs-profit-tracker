@@ -126,6 +126,41 @@ public class ProfitTrackerSessionTest
 		assertTrue(session.getTargets().isEmpty());
 	}
 
+	@Test
+	public void pausedSessionIgnoresKillsAndSupplyUse()
+	{
+		final ProfitTrackerSession session = new ProfitTrackerSession();
+
+		session.recordKill("Guard", Collections.singletonList(new ItemStack(COINS, 250)), prices);
+		session.togglePaused();
+		session.recordKill("Guard", Collections.singletonList(new ItemStack(COINS, 999)), prices);
+		session.recordSupplyCost(100);
+
+		assertTrue(session.isPaused());
+		assertEquals("Paused", session.getStatus());
+		assertEquals(1, session.getKillCount());
+		assertEquals(250, session.getLootValue());
+		assertEquals(0, session.getSupplyCost());
+
+		session.togglePaused();
+		session.recordSupplyCost(25);
+
+		assertFalse(session.isPaused());
+		assertEquals("Tracking", session.getStatus());
+		assertEquals(25, session.getSupplyCost());
+	}
+
+	@Test
+	public void unstartedSessionCannotPause()
+	{
+		final ProfitTrackerSession session = new ProfitTrackerSession();
+
+		session.togglePaused();
+
+		assertFalse(session.isPaused());
+		assertEquals("Waiting for loot", session.getStatus());
+	}
+
 	private static ProfitTrackerTarget onlyTarget(ProfitTrackerSession session)
 	{
 		assertEquals(1, session.getTargets().size());

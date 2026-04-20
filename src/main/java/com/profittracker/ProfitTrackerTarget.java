@@ -42,4 +42,13 @@ class ProfitTrackerTarget
 	{
 		return drops;
 	}
+
+	long getProfitShare(long totalProfit, long totalLoot)
+	{
+		if (totalLoot <= 0)
+		{
+			return 0;
+		}
+		return totalProfit * lootValue / totalLoot;
+	}
 }

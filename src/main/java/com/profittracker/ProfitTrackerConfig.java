@@ -40,4 +40,25 @@ public interface ProfitTrackerConfig extends Config
 	{
 		return false;
 	}
+
+	@ConfigItem(
+		keyName = "showDropBreakdown",
+		name = "Show drop breakdown",
+		description = "Show the highest-value drops for each NPC in the side panel."
+	)
+	default boolean showDropBreakdown()
+	{
+		return true;
+	}
+
+	@ConfigItem(
+		keyName = "maxDropsShown",
+		name = "Drops shown",
+		description = "Maximum number of drops to show per NPC."
+	)
+	@Range(min = 3, max = 20)
+	default int maxDropsShown()
+	{
+		return 8;
+	}
 }

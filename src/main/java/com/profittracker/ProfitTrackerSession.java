@@ -21,8 +21,16 @@ class ProfitTrackerSession
 	@Getter
 	private long supplyCost;
 
+	private Instant pausedAt;
+	private Duration pausedDuration = Duration.ZERO;
+
 	void recordKill(String npcName, Collection<ItemStack> drops, ProfitTrackerPriceLookup prices)
 	{
+		if (isPaused())
+		{
+			return;
+		}
+
 		if (startedAt == null)
 		{
 			startedAt = Instant.now();
@@ -48,7 +56,7 @@ class ProfitTrackerSession
 
 	void recordSupplyCost(long value)
 	{
-		if (value <= 0)
+		if (value <= 0 || isPaused())
 		{
 			return;
 		}
@@ -62,6 +70,8 @@ class ProfitTrackerSession
 		startedAt = null;
 		lootValue = 0;
 		supplyCost = 0;
+		pausedAt = null;
+		pausedDuration = Duration.ZERO;
 	}
 
 	boolean isStarted()
@@ -81,12 +91,50 @@ class ProfitTrackerSession
 
 	Duration getElapsed()
 	{
-		return startedAt == null ? Duration.ZERO : Duration.between(startedAt, Instant.now());
+		if (startedAt == null)
+		{
+			return Duration.ZERO;
+		}
+
+		final Instant end = pausedAt == null ? Instant.now() : pausedAt;
+		final Duration elapsed = Duration.between(startedAt, end).minus(pausedDuration);
+		return elapsed.isNegative() ? Duration.ZERO : elapsed;
 	}
 
 	void setStartedAt(Instant startedAt)
 	{
 		this.startedAt = startedAt;
+	}
+
+	boolean isPaused()
+	{
+		return pausedAt != null;
+	}
+
+	void togglePaused()
+	{
+		if (!isStarted())
+		{
+			return;
+		}
+
+		if (pausedAt == null)
+		{
+			pausedAt = Instant.now();
+			return;
+		}
+
+		pausedDuration = pausedDuration.plus(Duration.between(pausedAt, Instant.now()));
+		pausedAt = null;
+	}
+
+	String getStatus()
+	{
+		if (!isStarted())
+		{
+			return "Waiting for loot";
+		}
+		return isPaused() ? "Paused" : "Tracking";
 	}
 
 	long getProfitPerHour()

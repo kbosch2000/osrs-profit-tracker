@@ -38,4 +38,10 @@ public class ProfitTrackerPanelTest
 		assertEquals("live " + time, ProfitTrackerPanel.priceStatus(refresh, true));
 		assertEquals("fallback " + time, ProfitTrackerPanel.priceStatus(refresh, false));
 	}
+
+	@Test
+	public void buildsRows()
+	{
+		assertEquals(2, ProfitTrackerPanel.row("Loot", "1.0k").getComponentCount());
+	}
 }

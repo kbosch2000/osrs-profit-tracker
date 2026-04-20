@@ -66,7 +66,7 @@ public class ProfitTrackerPlugin extends Plugin
 		priceService = new ProfitTrackerPriceService(itemManager, config);
 		priceService.start();
 
-		panel = new ProfitTrackerPanel(session, this::resetSession);
+		panel = new ProfitTrackerPanel(session, itemManager, config, this::resetSession, this::togglePaused);
 		navButton = NavigationButton.builder()
 			.tooltip("Profit Tracker")
 			.icon(createIcon())
@@ -128,7 +128,7 @@ public class ProfitTrackerPlugin extends Plugin
 		final Map<Integer, Integer> current = toQuantityMap(event.getItemContainer());
 		final long currentValue = inventoryValue(current);
 
-		if (config.countSupplyLosses() && hasInventorySnapshot && session.isStarted())
+		if (config.countSupplyLosses() && hasInventorySnapshot && session.isStarted() && !session.isPaused())
 		{
 			final long valueLost = lastInventoryValue - currentValue;
 			if (valueLost > 0)
@@ -147,6 +147,13 @@ public class ProfitTrackerPlugin extends Plugin
 	void resetSession()
 	{
 		session.reset();
+		captureInventorySnapshot();
+		refreshPanel();
+	}
+
+	void togglePaused()
+	{
+		session.togglePaused();
 		captureInventorySnapshot();
 		refreshPanel();
 	}
