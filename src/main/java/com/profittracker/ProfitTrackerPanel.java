@@ -79,7 +79,7 @@ class ProfitTrackerPanel extends PluginPanel
 		return row;
 	}
 
-	private static String priceStatus(Instant lastRefresh, boolean usingWikiPrices)
+	static String priceStatus(Instant lastRefresh, boolean usingWikiPrices)
 	{
 		if (lastRefresh == null)
 		{
@@ -88,7 +88,7 @@ class ProfitTrackerPanel extends PluginPanel
 		return (usingWikiPrices ? "live " : "fallback ") + REFRESH_FORMAT.format(lastRefresh);
 	}
 
-	private static String formatDuration(Duration duration)
+	static String formatDuration(Duration duration)
 	{
 		final long seconds = duration.getSeconds();
 		final long hours = seconds / 3600;
@@ -97,7 +97,7 @@ class ProfitTrackerPanel extends PluginPanel
 		return String.format("%02d:%02d:%02d", hours, minutes, rest);
 	}
 
-	private static String formatGp(long value)
+	static String formatGp(long value)
 	{
 		final String sign = value < 0 ? "-" : "";
 		final long absolute = Math.abs(value);

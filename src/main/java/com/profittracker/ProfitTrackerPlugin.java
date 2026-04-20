@@ -56,6 +56,7 @@ public class ProfitTrackerPlugin extends Plugin
 	private NavigationButton navButton;
 	private final Map<Integer, Integer> lastInventory = new HashMap<>();
 	private final ProfitTrackerSession session = new ProfitTrackerSession();
+	private final ProfitTrackerInventory inventory = new ProfitTrackerInventory();
 	private long lastInventoryValue;
 	private boolean hasInventorySnapshot;
 
@@ -179,12 +180,7 @@ public class ProfitTrackerPlugin extends Plugin
 
 	private long inventoryValue(Map<Integer, Integer> quantities)
 	{
-		long total = 0;
-		for (Map.Entry<Integer, Integer> entry : quantities.entrySet())
-		{
-			total += (long) priceService.getLivePrice(entry.getKey()) * entry.getValue();
-		}
-		return total;
+		return inventory.value(quantities, priceService);
 	}
 
 	private void refreshPanel()

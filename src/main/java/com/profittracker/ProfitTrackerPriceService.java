@@ -117,7 +117,7 @@ class ProfitTrackerPriceService implements ProfitTrackerPriceLookup
 		}
 	}
 
-	private static int choosePrice(JsonObject price)
+	static int choosePrice(JsonObject price)
 	{
 		final int high = getInt(price, "high");
 		final int low = getInt(price, "low");
