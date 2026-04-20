@@ -17,7 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.runelite.client.game.ItemManager;
 
 @Slf4j
-class ProfitTrackerPriceService
+class ProfitTrackerPriceService implements ProfitTrackerPriceLookup
 {
 	private static final String LATEST_PRICES_URL = "https://prices.runescape.wiki/api/v1/osrs/latest";
 	private static final String USER_AGENT = "RuneLite Profit Tracker plugin - local development";
@@ -59,7 +59,8 @@ class ProfitTrackerPriceService
 		}
 	}
 
-	int getLivePrice(int itemId)
+	@Override
+	public int getLivePrice(int itemId)
 	{
 		final int canonicalId = itemManager.canonicalize(itemId);
 		final Integer wikiPrice = wikiPrices.get(canonicalId);

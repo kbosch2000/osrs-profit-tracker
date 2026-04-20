@@ -21,7 +21,7 @@ class ProfitTrackerSession
 	@Getter
 	private long supplyCost;
 
-	void recordKill(String npcName, Collection<ItemStack> drops, ProfitTrackerPriceService prices)
+	void recordKill(String npcName, Collection<ItemStack> drops, ProfitTrackerPriceLookup prices)
 	{
 		if (startedAt == null)
 		{
@@ -48,6 +48,11 @@ class ProfitTrackerSession
 
 	void recordSupplyCost(long value)
 	{
+		if (value <= 0)
+		{
+			return;
+		}
+
 		supplyCost += value;
 	}
 
@@ -77,6 +82,11 @@ class ProfitTrackerSession
 	Duration getElapsed()
 	{
 		return startedAt == null ? Duration.ZERO : Duration.between(startedAt, Instant.now());
+	}
+
+	void setStartedAt(Instant startedAt)
+	{
+		this.startedAt = startedAt;
 	}
 
 	long getProfitPerHour()
