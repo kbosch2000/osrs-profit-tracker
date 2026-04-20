@@ -26,4 +26,25 @@ public class ProfitTrackerSupplyActionTest
 		assertFalse(ProfitTrackerPlugin.isSupplyUseOption("Take"));
 		assertFalse(ProfitTrackerPlugin.isSupplyUseOption("Wield"));
 	}
+
+	@Test
+	public void detectsInventoryActionsThatShouldNotCountAsSupplies()
+	{
+		assertTrue(ProfitTrackerPlugin.isIgnoredInventoryOption("Drop"));
+		assertTrue(ProfitTrackerPlugin.isIgnoredInventoryOption("Deposit"));
+		assertTrue(ProfitTrackerPlugin.isIgnoredInventoryOption("Deposit-All"));
+		assertTrue(ProfitTrackerPlugin.isIgnoredInventoryOption("Wield"));
+		assertTrue(ProfitTrackerPlugin.isIgnoredInventoryOption("Wear"));
+		assertTrue(ProfitTrackerPlugin.isIgnoredInventoryOption("Remove"));
+		assertTrue(ProfitTrackerPlugin.isIgnoredInventoryOption("Withdraw"));
+	}
+
+	@Test
+	public void doesNotIgnoreCombatResourceBurnByDefault()
+	{
+		assertFalse(ProfitTrackerPlugin.isIgnoredInventoryOption(null));
+		assertFalse(ProfitTrackerPlugin.isIgnoredInventoryOption("Cast"));
+		assertFalse(ProfitTrackerPlugin.isIgnoredInventoryOption("Attack"));
+		assertFalse(ProfitTrackerPlugin.isIgnoredInventoryOption("Fire"));
+	}
 }

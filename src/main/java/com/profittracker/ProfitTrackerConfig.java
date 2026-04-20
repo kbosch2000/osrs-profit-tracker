@@ -32,6 +32,16 @@ public interface ProfitTrackerConfig extends Config
 	}
 
 	@ConfigItem(
+		keyName = "countPassiveResourceLosses",
+		name = "Track ammo/runes/charges",
+		description = "Count value lost from inventory or equipment during combat, including runes, ammo, thrown items, and visible charge/item changes."
+	)
+	default boolean countPassiveResourceLosses()
+	{
+		return true;
+	}
+
+	@ConfigItem(
 		keyName = "announceNewSession",
 		name = "Chat session start",
 		description = "Send a quiet chat message when the tracker sees the first NPC loot."
